@@ -7,11 +7,18 @@ a global executable or a path to
 an executable
 ]]
 -- THESE ARE EXAMPLE CONFIGS FEEL FREE TO CHANGE TO WHATEVER YOU WANT
+local function termcodes(str)
+  return vim.api.nvim_replace_termcodes(str, true, true, true)
+end
 
 -- general
 lvim.log.level = "warn"
-lvim.format_on_save.enabled = false
+lvim.format_on_save = true
 lvim.colorscheme = "lunar"
+
+vim.opt.relativenumber = true
+vim.opt.wrap = false
+
 -- to disable icons and use a minimalist setup, uncomment the following
 -- lvim.use_icons = false
 
@@ -19,8 +26,34 @@ lvim.colorscheme = "lunar"
 lvim.leader = "space"
 -- add your own keymapping
 lvim.keys.normal_mode["<C-s>"] = ":w<cr>"
--- lvim.keys.normal_mode["<S-l>"] = ":BufferLineCycleNext<CR>"
--- lvim.keys.normal_mode["<S-h>"] = ":BufferLineCyclePrev<CR>"
+lvim.keys.normal_mode["d"] = "\"_d"
+lvim.keys.visual_mode["d"] = "\"_d"
+lvim.keys.normal_mode["c"] = "\"_c"
+lvim.keys.visual_mode["c"] = "\"_c"
+lvim.keys.visual_mode["p"] = "\"_c<C-r><C-o>+<Esc>"
+
+lvim.keys.term_mode["<leader><Esc>"] = termcodes "<C-\\><C-N>"
+lvim.keys.normal_mode["<leader><Esc>"] = "<cmd>BufferKill<CR>"
+lvim.keys.visual_mode["<leader><Esc>"] = "<cmd>BufferKill<CR>"
+
+lvim.keys.normal_mode["<leader><Esc>"] = "<cmd>BufferKill<CR>"
+lvim.keys.normal_mode["<leader>t"] = ":let $VIM_DIR=expand('%:p:h')<CR>:terminal<CR>Acd $VIM_DIR<CR>"
+lvim.keys.normal_mode["<leader>n"] = ":tabnew<CR>"
+lvim.keys.normal_mode["<leader>a"] = ":SymbolsOutline<CR>"
+lvim.keys.normal_mode["<leader>rr"] = ":NvimTreeRefresh<CR>"
+lvim.keys.normal_mode["<leader>ra"] = ":%s/\\<<C-r><C-w>\\>/<C-r><C-w>/gI<Left><Left><Left>"
+lvim.keys.visual_mode["<leader>rs"] = ":s/\\<<C-r><C-w>\\>/<C-r><C-w>/gI<Left><Left><Left>"
+lvim.keys.visual_mode["<leader>rk"] = ":s/\\(.*\\)/\\1"
+
+lvim.keys.normal_mode["∆"] = ":resize -2<CR>"
+lvim.keys.normal_mode["˚"] = ":resize +2<CR>"
+lvim.keys.normal_mode["˙"] = ":vertical resize -2<CR>"
+lvim.keys.normal_mode["¬"] = ":vertical resize +2<CR>"
+
+
+lvim.keys.visual_block_mode["∆"] = ":m '>+1<CR>gv-gv"
+lvim.keys.visual_block_mode["˚"] = ":m '<-2<CR>gv-gv"
+
 -- unmap a default keymapping
 -- vim.keymap.del("n", "<C-Up>")
 -- override a default keymapping
@@ -44,10 +77,6 @@ lvim.keys.normal_mode["<C-s>"] = ":w<cr>"
 --   },
 -- }
 
--- Change theme settings
--- lvim.builtin.theme.options.dim_inactive = true
--- lvim.builtin.theme.options.style = "storm"
-
 -- Use which-key to add extra bindings with the leader-key prefix
 -- lvim.builtin.which_key.mappings["P"] = { "<cmd>Telescope projects<CR>", "Projects" }
 -- lvim.builtin.which_key.mappings["t"] = {
@@ -57,7 +86,7 @@ lvim.keys.normal_mode["<C-s>"] = ":w<cr>"
 --   d = { "<cmd>Trouble document_diagnostics<cr>", "Diagnostics" },
 --   q = { "<cmd>Trouble quickfix<cr>", "QuickFix" },
 --   l = { "<cmd>Trouble loclist<cr>", "LocationList" },
---   w = { "<cmd>Trouble workspace_diagnostics<cr>", "Workspace Diagnostics" },
+--   w = { "<cmd>Trouble workspace_diagnostics<cr>", "Wordspace Diagnostics" },
 -- }
 
 -- TODO: User Config for predefined plugins
@@ -65,9 +94,9 @@ lvim.keys.normal_mode["<C-s>"] = ":w<cr>"
 lvim.builtin.alpha.active = true
 lvim.builtin.alpha.mode = "dashboard"
 lvim.builtin.terminal.active = true
+lvim.builtin.terminal.direction = 'horizontal'
 lvim.builtin.nvimtree.setup.view.side = "left"
-lvim.builtin.nvimtree.setup.renderer.icons.show.git = false
-
+lvim.builtin.nvimtree.setup.renderer.icons.show.git = true
 -- if you don't want all the parsers change this to a table of the ones you want
 lvim.builtin.treesitter.ensure_installed = {
   "bash",
@@ -85,26 +114,39 @@ lvim.builtin.treesitter.ensure_installed = {
 }
 
 lvim.builtin.treesitter.ignore_install = { "haskell" }
-lvim.builtin.treesitter.highlight.enable = true
+lvim.builtin.treesitter.highlight.enabled = true
+lvim.builtin.lualine.sections.lualine_a = { 'mode' }
+lvim.builtin.lualine.sections.lualine_c = {
+  {
+    'filename',
+    path = 2, -- 0: Just the filename
+  }
+}
+
+
+-- lvim.builtin.nvimtree.view = {
+--   width = 50,
+--   height = 30,
+--   hide_root_folder = false,
+--   side = "left",
+--   preserve_window_proportions = false,
+--   mappings = {
+--     custom_only = false,
+--     list = {},
+--   },
+--   number = false,
+--   relativenumber = true,
+--   signcolumn = "yes",
+-- }
+
+lvim.builtin.terminal.open_mapping = [[<c-\>]]
 
 -- generic LSP settings
 
--- -- make sure server will always be installed even if the server is in skipped_servers list
--- lvim.lsp.installer.setup.ensure_installed = {
---     "sumneko_lua",
---     "jsonls",
--- }
--- -- change UI setting of `LspInstallInfo`
--- -- see <https://github.com/williamboman/nvim-lsp-installer#default-configuration>
--- lvim.lsp.installer.setup.ui.check_outdated_servers_on_open = false
--- lvim.lsp.installer.setup.ui.border = "rounded"
--- lvim.lsp.installer.setup.ui.keymaps = {
---     uninstall_server = "d",
---     toggle_server_expand = "o",
--- }
+lvim.lsp.update_in_insert = true
 
 -- ---@usage disable automatic installation of servers
--- lvim.lsp.installer.setup.automatic_installation = false
+-- lvim.lsp.automatic_servers_installation = false
 
 -- ---configure a server manually. !!Requires `:LvimCacheReset` to take effect!!
 -- ---see the full default list `:lua print(vim.inspect(lvim.lsp.automatic_configuration.skipped_servers))`
@@ -113,8 +155,8 @@ lvim.builtin.treesitter.highlight.enable = true
 -- require("lvim.lsp.manager").setup("pyright", opts)
 
 -- ---remove a server from the skipped list, e.g. eslint, or emmet_ls. !!Requires `:LvimCacheReset` to take effect!!
--- ---`:LvimInfo` lists which server(s) are skipped for the current filetype
--- lvim.lsp.automatic_configuration.skipped_servers = vim.tbl_filter(function(server)
+-- ---`:LvimInfo` lists which server(s) are skiipped for the current filetype
+-- vim.tbl_map(function(server)
 --   return server ~= "emmet_ls"
 -- end, lvim.lsp.automatic_configuration.skipped_servers)
 
@@ -163,12 +205,153 @@ lvim.builtin.treesitter.highlight.enable = true
 -- }
 
 -- Additional Plugins
--- lvim.plugins = {
---     {
---       "folke/trouble.nvim",
---       cmd = "TroubleToggle",
---     },
--- }
+lvim.plugins = {
+  --     {"folke/tokyonight.nvim"},
+  --     {
+  --       "folke/trouble.nvim",
+  --       cmd = "TroubleToggle",
+  --     },
+  { "ray-x/lsp_signature.nvim" },
+  { "simrat39/symbols-outline.nvim" },
+  { "fatih/vim-go" },
+  { "SirVer/ultisnips" },
+  { "quangnguyen30192/cmp-nvim-ultisnips" },
+  -- {
+  --   "ggandor/lightspeed.nvim"
+  -- },
+  { "phaazon/hop.nvim" },
+  {
+    "tpope/vim-surround",
+    -- make sure to change the value of `timeoutlen` if it's not triggering correctly, see https://github.com/tpope/vim-surround/issues/117
+    -- setup = function()
+    --  vim.o.timeoutlen = 500
+    -- end
+  },
+  { "kdheepak/lazygit.nvim" },
+  {
+    "rust-lang/rust.vim"
+  }
+}
+
+require("hop").setup()
+vim.api.nvim_set_keymap("n", "s", ":HopChar2<cr>", { silent = true })
+vim.api.nvim_set_keymap("n", "S", ":HopWord<cr>", { silent = true })
+
+-- local _, lightspeed = pcall(require, "lightspeed")
+-- lightspeed.setup({
+--   ignore_case = true
+-- })
+
+local _, cmp = pcall(require, "cmp")
+
+local _, symbols_outline = pcall(require, "symbols-outline")
+symbols_outline.setup()
+
+
+local _, luasnip = pcall(require, "luasnip")
+lvim.builtin.cmp.snippet = {
+  expand = function(args)
+    vim.fn["UltiSnips#Anon"](args.body)
+    -- luasnip.lsp_expand(args.body)
+  end,
+}
+
+lvim.builtin.cmp.sources = {
+  { name = "ultisnips" },
+  { name = "nvim_lsp" },
+  { name = "path" },
+  { name = "luasnip" },
+  { name = "cmp_tabnine" },
+  { name = "nvim_lua" },
+  { name = "buffer" },
+  { name = "calc" },
+  { name = "emoji" },
+  { name = "treesitter" },
+  { name = "crates" },
+  { name = "tmux" },
+}
+local _, cmp_ultisnips_mappings = pcall(require, "cmp_nvim_ultisnips.mappings")
+local jumpable = lvim.builtin.cmp.jumpable
+local check_backspace = lvim.builtin.cmp.check_backspace
+local is_emmet_active = lvim.builtin.cmp.is_emmet_active
+lvim.builtin.cmp.mapping = cmp.mapping.preset.insert {
+  ["<C-k>"] = cmp.mapping.select_prev_item(),
+  ["<C-j>"] = cmp.mapping.select_next_item(),
+  ["<C-d>"] = cmp.mapping.scroll_docs(-4),
+  ["<C-f>"] = cmp.mapping.scroll_docs(4),
+  -- TODO: potentially fix emmet nonsense
+  ["<Tab>"] = cmp.mapping(function(fallback)
+    if cmp.visible() then
+      cmp_ultisnips_mappings.expand_or_jump_forwards(fallback)
+      -- cmp.select_next_item()
+    elseif luasnip.expandable() then
+      luasnip.expand()
+    elseif jumpable() then
+      luasnip.jump(1)
+    elseif check_backspace() then
+      fallback()
+    elseif is_emmet_active() then
+      return vim.fn["cmp#complete"]()
+    else
+      fallback()
+    end
+  end, {
+    "i",
+    "s",
+  }),
+  ["<S-Tab>"] = cmp.mapping(function(fallback)
+    if cmp.visible() then
+      cmp_ultisnips_mappings.jump_backwards(fallback)
+      -- cmp.select_prev_item()
+    elseif jumpable(-1) then
+      luasnip.jump(-1)
+    else
+      fallback()
+    end
+  end, {
+    "i",
+    "s",
+  }),
+
+  ["<C-Space>"] = cmp.mapping.complete(),
+  ["<C-e>"] = cmp.mapping.abort(),
+  ["<CR>"] = cmp.mapping(function(fallback)
+    if cmp.visible() and cmp.confirm(lvim.builtin.cmp.confirm_opts) then
+      if jumpable() then
+        luasnip.jump(1)
+      end
+      return
+    end
+
+    if jumpable() then
+      if not luasnip.jump(1) then
+        fallback()
+      end
+    else
+      fallback()
+    end
+  end),
+}
+
+lvim.builtin.cmp.mapping["<CR>"] = cmp.mapping.confirm({ select = true })
+
+local _, cmp_autopairs = pcall(require, "nvim-autopairs.completion.cmp")
+cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
+
+lvim.lsp.on_attach_callback = function(_, bufnr)
+
+  local _, lsp_signature = pcall(require, "lsp_signature")
+  lsp_signature.on_attach({
+    bind = true, -- This is mandatory, otherwise border config won't get registered.
+    handler_opts = {
+      border = "rounded"
+    }
+  }, bufnr)
+end
+
+local _, lspconfig = pcall(require, "lspconfig")
+lspconfig.rls.setup {}
+
 
 -- Autocommands (https://neovim.io/doc/user/autocmd.html)
 -- vim.api.nvim_create_autocmd("BufEnter", {
